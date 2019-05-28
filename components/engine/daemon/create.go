@@ -29,7 +29,7 @@ func (daemon *Daemon) CreateManagedContainer(params types.ContainerCreateConfig)
 	return daemon.containerCreate(params, true)
 }
 
-// ContainerCreate creates a regular container
+// ContainerCreate creates a regular container   创建一个容器
 func (daemon *Daemon) ContainerCreate(params types.ContainerCreateConfig) (containertypes.ContainerCreateCreatedBody, error) {
 	return daemon.containerCreate(params, false)
 }
@@ -42,7 +42,7 @@ func (daemon *Daemon) containerCreate(params types.ContainerCreateConfig, manage
 
 	os := runtime.GOOS
 	if params.Config.Image != "" {
-		img, err := daemon.GetImage(params.Config.Image)
+		img, err := daemon.GetImage(params.Config.Image)			// 拉取镜像
 		if err == nil {
 			os = img.OS
 		}
@@ -53,12 +53,12 @@ func (daemon *Daemon) containerCreate(params types.ContainerCreateConfig, manage
 			os = "linux"
 		}
 	}
-	//验证HostConfig、Config的信息正确性。
+	//验证容器的配置，如果有问题，就不能创建
 	warnings, err := daemon.verifyContainerSettings(os, params.HostConfig, params.Config, false)
 	if err != nil {
 		return containertypes.ContainerCreateCreatedBody{Warnings: warnings}, errdefs.InvalidParameter(err)
 	}
-	//验证NetworkingConfig的正确性
+	//验证网络配置
 	err = verifyNetworkingConfig(params.NetworkingConfig)
 	if err != nil {
 		return containertypes.ContainerCreateCreatedBody{Warnings: warnings}, errdefs.InvalidParameter(err)
@@ -67,12 +67,12 @@ func (daemon *Daemon) containerCreate(params types.ContainerCreateConfig, manage
 	if params.HostConfig == nil {
 		params.HostConfig = &containertypes.HostConfig{}
 	}
-	//修改并更新hostconfig的不正常值，例如CPUShares、Memory
+	//调整一些配置，例如CPU如果超量，就设置成系统允许的最大的
 	err = daemon.adaptContainerSettings(params.HostConfig, params.AdjustCPUShares)
 	if err != nil {
 		return containertypes.ContainerCreateCreatedBody{Warnings: warnings}, errdefs.InvalidParameter(err)
 	}
-	//进一步调用daemon的create()
+	//创建容器
 	container, err := daemon.create(params, managed)
 	if err != nil {
 		return containertypes.ContainerCreateCreatedBody{Warnings: warnings}, err
@@ -83,7 +83,7 @@ func (daemon *Daemon) containerCreate(params types.ContainerCreateConfig, manage
 }
 // 步骤如下:获取镜像ID:GetImage()->合并容器配置:mergeAndVerifyConfig()->合并日志配置:mergeAndVerifyLogConfig()->创建容器对象:newContainer()
 // ->设置安全选项:setSecurityOptions()->设置容器读写层:setRWLayer()->创建文件夹保存容器配置信息:MkdirAndChown()->容器网络配置
-// Create creates a new container from the given configuration with a given name.
+// Create creates a new container from the given configuration with a given name.       创建容器
 func (daemon *Daemon) create(params types.ContainerCreateConfig, managed bool) (retC *container.Container, retErr error) {
 	var (										//定义一些全局变量
 		container *container.Container
@@ -124,7 +124,7 @@ func (daemon *Daemon) create(params types.ContainerCreateConfig, managed bool) (
 	if err := daemon.mergeAndVerifyLogConfig(&params.HostConfig.LogConfig); err != nil {
 		return nil, errdefs.InvalidParameter(err)
 	}
-	//进一步调用daemon包下的newContainer函数
+	//创建容器。此处返回的是内存中对容器的一个抽象`Container`
 	if container, err = daemon.newContainer(params.Name, os, params.Config, params.HostConfig, imgID, managed); err != nil {
 		return nil, err
 	}
@@ -159,7 +159,7 @@ func (daemon *Daemon) create(params types.ContainerCreateConfig, managed bool) (
 		}
 	}
 
-	// Set RWLayer for container after mount labels have been set
+	// Set RWLayer for container after mount labels have been set		要创建一个RWLayer，这样容器里面才可以读写。前面的layer都包含在image里。
 	if err := daemon.setRWLayer(container); err != nil {				//挂载了labels后，为容器设置读写层
 		return nil, errdefs.System(err)
 	}

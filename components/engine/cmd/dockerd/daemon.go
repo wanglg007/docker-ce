@@ -101,12 +101,12 @@ func (cli *DaemonCli) start(opts *daemonOptions) (err error) {
 	})
 
 	system.InitLCOW(cli.Config.Experimental)
-
+	// 设置默认的umask 022。即创建的文件权限都是755
 	if err := setDefaultUmask(); err != nil {
 		return fmt.Errorf("Failed to set umask: %v", err)
 	}
 
-	// Create the daemon root before we create ANY other files (PID, or migrate keys)
+	// Create the daemon root before we create ANY other files (PID, or migrate keys)  	设置daemon的执行时候的根目录
 	// to ensure the appropriate ACL is set (particularly relevant on Windows)
 	if err := daemon.CreateDaemonRoot(cli.Config); err != nil {			// 创建daemon的root路径,linux为/var/lib/docker
 		return err
@@ -131,7 +131,7 @@ func (cli *DaemonCli) start(opts *daemonOptions) (err error) {
 		Version:     dockerversion.Version,
 		CorsHeaders: cli.Config.CorsHeaders,
 	}
-
+	//是否走TLS
 	if cli.Config.TLS {
 		tlsOptions := tlsconfig.Options{
 			CAFile:             cli.Config.CommonTLSOptions.CAFile,
@@ -158,7 +158,7 @@ func (cli *DaemonCli) start(opts *daemonOptions) (err error) {
 	cli.api = apiserver.New(serverConfig)							// 新建一个server实例
 
 	var hosts []string
-
+	// 设置API server
 	for i := 0; i < len(cli.Config.Hosts); i++ {					// 循环遍历配置文件里的所有host，增加server监听
 		var err error
 		//6>解析host文件及传输协议（tcp）等内容
@@ -226,7 +226,7 @@ func (cli *DaemonCli) start(opts *daemonOptions) (err error) {
 		logrus.Fatalf("Error creating middlewares: %v", err)
 	}
 	//13>根据DaemonCli的配置信息，注册的服务对象及libcontainerd对象来构建Daemon对象
-	d, err := daemon.NewDaemon(cli.Config, registryService, containerdRemote, pluginStore)
+	d, err := daemon.NewDaemon(cli.Config, registryService, containerdRemote, pluginStore)				// 实例化daemon
 	if err != nil {
 		return fmt.Errorf("Error starting daemon: %v", err)
 	}
@@ -283,14 +283,14 @@ func (cli *DaemonCli) start(opts *daemonOptions) (err error) {
 	//16>将新建的Daemon对象与DaemonCli相关联
 	cli.d = d
 
-	routerOptions, err := newRouterOptions(cli.Config, d)
+	routerOptions, err := newRouterOptions(cli.Config, d)			// 注册handler到router
 	if err != nil {
 		return err
 	}
 	routerOptions.api = cli.api
 	routerOptions.cluster = c
 	//17>初始化路由器
-	initRouter(routerOptions)
+	initRouter(routerOptions)										// 初始化router
 
 	// process cluster change notifications
 	watchCtx, cancel := context.WithCancel(context.Background())

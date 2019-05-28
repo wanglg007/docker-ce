@@ -144,7 +144,7 @@ func (daemon *Daemon) newContainer(name string, operatingSystem string, config *
 			}
 		}
 	} else {
-		daemon.generateHostname(id, config)					//否则，根据id和config生成一个hostname
+		daemon.generateHostname(id, config)					//原来容器的hostname默认是容器id的前12位
 	}
 	//获得entrypoint和args
 	entrypoint, args := daemon.getEntrypointAndArgs(config.Entrypoint, config.Cmd)
