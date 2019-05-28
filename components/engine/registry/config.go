@@ -16,13 +16,13 @@ import (
 
 // ServiceOptions holds command line options.
 type ServiceOptions struct {
-	AllowNondistributableArtifacts []string `json:"allow-nondistributable-artifacts,omitempty"`
+	AllowNondistributableArtifacts []string `json:"allow-nondistributable-artifacts,omitempty"`		//docker registry镜像地址
 	Mirrors                        []string `json:"registry-mirrors,omitempty"`
 	InsecureRegistries             []string `json:"insecure-registries,omitempty"`
 
 	// V2Only controls access to legacy registries.  If it is set to true via the
 	// command line flag the daemon will not attempt to contact v1 legacy registries
-	V2Only bool `json:"disable-legacy-registry,omitempty"`
+	V2Only bool `json:"disable-legacy-registry,omitempty"`											//只允许V2方式访问
 }
 
 // serviceConfig holds daemon configuration for the registry service.

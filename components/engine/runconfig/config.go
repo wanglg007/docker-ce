@@ -17,7 +17,7 @@ type ContainerDecoder struct{}
 func (r ContainerDecoder) DecodeConfig(src io.Reader) (*container.Config, *container.HostConfig, *networktypes.NetworkingConfig, error) {
 	return decodeContainerConfig(src)
 }
-
+// 解析客户端的docker start中的包体内容反序列号，然后存到该结构中，见 //postContainersStart->DecodeHostConfig
 // DecodeHostConfig makes ContainerDecoder to implement httputils.ContainerDecoder
 func (r ContainerDecoder) DecodeHostConfig(src io.Reader) (*container.HostConfig, error) {
 	return decodeHostConfig(src)

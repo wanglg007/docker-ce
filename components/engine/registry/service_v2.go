@@ -9,7 +9,7 @@ import (
 
 func (s *DefaultService) lookupV2Endpoints(hostname string) (endpoints []APIEndpoint, err error) {
 	tlsConfig := tlsconfig.ServerDefault()
-	if hostname == DefaultNamespace || hostname == IndexHostname {
+	if hostname == DefaultNamespace || hostname == IndexHostname {				//如果是官方的 docker.io 或者 index.docker.io
 		// v2 mirrors
 		for _, mirror := range s.config.Mirrors {
 			if !strings.HasPrefix(mirror, "http://") && !strings.HasPrefix(mirror, "https://") {
@@ -51,7 +51,7 @@ func (s *DefaultService) lookupV2Endpoints(hostname string) (endpoints []APIEndp
 		return nil, err
 	}
 
-	endpoints = []APIEndpoint{
+	endpoints = []APIEndpoint{					//hostname的https v2请求
 		{
 			URL: &url.URL{
 				Scheme: "https",
@@ -64,7 +64,7 @@ func (s *DefaultService) lookupV2Endpoints(hostname string) (endpoints []APIEndp
 		},
 	}
 
-	if tlsConfig.InsecureSkipVerify {
+	if tlsConfig.InsecureSkipVerify {			//加上这个配置这允许 http方式访问
 		endpoints = append(endpoints, APIEndpoint{
 			URL: &url.URL{
 				Scheme: "http",
