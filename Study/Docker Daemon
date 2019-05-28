@@ -1,0 +1,7 @@
+(1)备注:
+Docker Daemon是Docker架构中运行在后台的守护进程，大致可以分为Docker Server、Engine和Job部分。三者的关系大致如下：Docker Daemon通过
+Docker Server模块接收Docker Client的请求，并在Engine处理请求，然后根据请求类型，创建出指定的Job并运行。
+(2)代码分析:
+    <2.1>Daemon的main函数位于docker-ce/components/engine/cmd/dockerd/docker.go文件中;
+    <2.2>
+    <2.3>

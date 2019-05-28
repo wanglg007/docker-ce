@@ -1,0 +1,19 @@
+(1)备注:
+Docker Client是Docker架构中用户与Docker Daemon建立通信的客户端。对于Docker这样一个C/S架构，客户端的存在意味着Docker相应
+任务的发起。用户首先要创建一个Docker Client，然后将特定的请求类型与参数传递至Docker Client，最终由Docker Client转义成
+Docker Server能识别的形式，并发送至Docker Server。
+(2)Docker Client创建代码分析:
+Docker Client的main函数位于docker-ce/components/cli/cmd/docker/docker.go
+    <2.1>NewDockerCli方法位于docker-ce/components/cli/cli/command/cli.go文件，它返回一个DockerCli类型的对象实例。
+    <2.2>newDockerCommand在docker-ce/components/cli/cmd/docker/docker.go文件中，它根据DockerCli类型的对象实例，返回cobra.Command对象实例。
+    <2.3>执行cmd，并进行错误信息处理。
+(3)Docker Client对命令的执行:
+通过commands.AddCommands(cmd, dockerCli)来向docker根命令添加所有子命令，AddCommands方法位于docker-ce/components/cli/cli/command/commands中;
+下面以pull image为例来说明Docker Client对命令的执行。
+    <3.1>image.NewImageCommand(dockerCli)方法位于docker-ce/components/cli/cli/command/image/cmd.go文件中。
+    <3.2>NewPullCommand方法位于docker-ce/components/cli/cli/command/image/pull.go文件中;
+    <3.3>ImagePull方法位于docker-ce/components/engine/client/image_pull.go文件中;
+    <3.4>tryImageCreate方法位于docker-ce/components/engine/client/image_create.go文件中;
+    <3.5>分析完毕;
+    以上便是pull请求的全部过程，其他请求在执行流程上也大同小异。总之，请求执行过程中，大多都是将命令行中关于请求的参数进行初步处理，并添加相应的
+    辅助信息，最终通过指定的协议向Docker Server发送相应的API请求。这些API请求都是Docker Client和Docker Server事先约定好的。

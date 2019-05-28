@@ -1,0 +1,41 @@
+(1)docker build源码分析:
+     用户可以通过一个自定义的Dockerfile文件以及相关内容，从一个基础镜像起步，对于 Dockerfile 中的每一条命令，都在原先的镜像
+layer之上再额外构建一个新的镜像layer，直至构建出用户所需的镜像。由于docker build命令由Docker用户发起，故docker build的流程会
+贯穿Docker Client、Docker Server以及Docker Daemon这三个重要的Docker模块。分析如下：
+    <1.1>Docker Client作为用户请求的人口，自然第一个接收并处理docker build命令。主要包括：定义并解析flag参数、获取Dockerfile相关内容。
+其具体流程图参考:DockerClient接收命令流程图.png;
+main -> NewBuilderCommand -> runBuild。 runBuild()函数只是从Client解析docker build命令和参数；
+    <1.2>docker server负责根据请求类型以及请求的URL，路由转发Docker请求至相应的处理方法。在处理方法中，Docker Server会创建相应的Job，
+为Job置相应的执行参数并触发该Job的运行。在此，将参数信息配置到JSON数据中。
+    <1.3>通过参数信息配置（newImageBuildOptions）构建选项数据（buildOption）
+    <1.4>配置好选项数据，将其作为参数，调用imgID：= br.backend.Build()
+    <1.5>return newBuilder(ctx, builderOptions).build(source, dockerfile);其中newBuilder()从可选的dockerfile和options创建一个新的Dockerfile构建器,
+build()通过解析Dockerfile并执行文件中的指令来运行Dockerfile构建器;
+    <1.6>build()函数调用dispatchFromDockerfile()，dispatchFromDockerfile()调用dispatch()函数。dispatch()函数找到每一种Dockerfile命令对应的handler
+处理函数并执行。
+    <1.7>dispatchRun()函数
+
+(2)docker run源码分析:
+    <2.1>Docker client--container create部分：
+    components/cli/cmd/docker.go:main() -> newDockerCommand() -> AddCommands() ->
+    components/cli/cli/command/commands/commands.go:AddCommands() -> NewRunCommand() ->
+    runRun() -> runContainer()
+    <2.2>Docker daemon--container create部分:
+    所谓“运行docker”，即运行Docker daemon。其主要有两方面的作用：接收并处理Docker Client发送的请求、管理所有的Docker容器。Docker Daemon运行时会
+在后台启动一个Server负责接收Docker Client发送的请求;接收请求后，Server通过路由与分发调度，找到相应的Handler来处理请求。
+    Docker daemon的结构分布：Docker Server、Docker Engine和Docker Job。Docker Server:Docker架构中专门服务于Docker Client，它的功能是接收并调度分发
+Docker Client发送的请求。Engine:Docker架构中的运行引擎，同时也是Docker运行的核心模块。 Engine存储着大量的容器信息，同时管理着Docker大部分Job的执行。
+在Docker源码中，有关Engine的数据结构定义中含有一个名为handlers的对象。该handlers对象存储的是关于众多特定Job各自的处理方式handler。Job:可以认为是
+Docker架构中Engine内部最基本的工作执行单元。DockerDaemon以完成的每一项工作都会呈现为一个Job。例如，在Docker容器内部运行一个进程，这是一个Job; 创建
+一个新的容器，这是一个Job; 在网络上下载一个文档，这是一个Job; 包括之前在Docker Server部分谈及的，创建Server服务于HTTP协议的API 。
+    First:在上一部分中，ContainerCreate()和ContainerStart()分别向daemon发送了create和start命令。还是从docker engine的main函数开始：
+    components/engine/cmd/dockerd/docker.go:main() -> newDaemonCommand() -> runDaemon() -> start() ->
+    Second:路由调度分发：initRouter() ->
+    docker run命令其实是由两部分组成：create和start。所以最后将client发来的命令，分别路由到postContainersCreate和postContainersStart函数，在这两个
+    函数中分别做容器创建和启动的工作。
+    Third:daemon端对container create的处理，即r.postContainersCreate() ->
+    Four: ContainerCreate() -> containerCreate() -> create()
+    到此已经完成container对象的初始化，然后根据postContainersCreate()中的return httputils.WriteJSON(w, http.StatusCreated, ccr),将结果返回给client。
+    <2.3>Docker daemon--container start部分:
+    daemon端对container start的处理，即r.postContainersStart()函数。
+
