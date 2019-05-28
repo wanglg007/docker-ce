@@ -49,7 +49,7 @@ func (r *containerRouter) initRoutes() {
 		router.NewPostRoute("/containers/{name:.*}/pause", r.postContainersPause),
 		router.NewPostRoute("/containers/{name:.*}/unpause", r.postContainersUnpause),
 		router.NewPostRoute("/containers/{name:.*}/restart", r.postContainersRestart),
-		router.NewPostRoute("/containers/{name:.*}/start", r.postContainersStart),
+		router.NewPostRoute("/containers/{name:.*}/start", r.postContainersStart),								//start容器的API路由
 		router.NewPostRoute("/containers/{name:.*}/stop", r.postContainersStop),
 		router.NewPostRoute("/containers/{name:.*}/wait", r.postContainersWait, router.WithCancel),
 		router.NewPostRoute("/containers/{name:.*}/resize", r.postContainersResize),

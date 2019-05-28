@@ -40,27 +40,27 @@ type HealthConfig struct {
 // Non-portable information *should* appear in HostConfig.
 // All fields added to this struct must be marked `omitempty` to keep getting
 // predictable hashes from the old `v1Compatibility` configuration.
-type Config struct {
-	Hostname        string              // Hostname
-	Domainname      string              // Domainname
-	User            string              // User that will run the command(s) inside the container, also support user:group
+type Config struct {					// 包含着容器的配置数据，主要是与主机无关的配置数据，比如hostname，user;
+	Hostname        string              // Hostname			容器内的主机名
+	Domainname      string              // Domainname		域名服务器名称
+	User            string              // User that will run the command(s) inside the container, also support user:group	容器内用户名
 	AttachStdin     bool                // Attach the standard input, makes possible user interaction
-	AttachStdout    bool                // Attach the standard output
+	AttachStdout    bool                // Attach the standard output														是否附加标准输出
 	AttachStderr    bool                // Attach the standard error
-	ExposedPorts    nat.PortSet         `json:",omitempty"` // List of exposed ports
-	Tty             bool                // Attach standard streams to a tty, including stdin if it is not closed.
-	OpenStdin       bool                // Open stdin
-	StdinOnce       bool                // If true, close stdin after the 1 attached client disconnects.
-	Env             []string            // List of environment variable to set in the container
-	Cmd             strslice.StrSlice   // Command to run when starting the container
+	ExposedPorts    nat.PortSet         `json:",omitempty"` // List of exposed ports										容器内暴露的端口号
+	Tty             bool                // Attach standard streams to a tty, including stdin if it is not closed.			是否分配一个伪终端
+	OpenStdin       bool                // Open stdin		在没有附加标准输入时，是否依然打开标准输入
+	StdinOnce       bool                // If true, close stdin after the 1 attached client disconnects.					如该为真，用户关闭标准输入，容器的标准输入关闭
+	Env             []string            // List of environment variable to set in the container								环境变量
+	Cmd             strslice.StrSlice   // Command to run when starting the container										容器内运行的指令
 	Healthcheck     *HealthConfig       `json:",omitempty"` // Healthcheck describes how to check the container is healthy
 	ArgsEscaped     bool                `json:",omitempty"` // True if command is already escaped (Windows specific)
-	Image           string              // Name of the image as it was passed by the operator (e.g. could be symbolic)
-	Volumes         map[string]struct{} // List of volumes (mounts) used for the container
-	WorkingDir      string              // Current directory (PWD) in the command will be launched
-	Entrypoint      strslice.StrSlice   // Entrypoint to run when starting the container
-	NetworkDisabled bool                `json:",omitempty"` // Is network disabled
-	MacAddress      string              `json:",omitempty"` // Mac Address of the container
+	Image           string              // Name of the image as it was passed by the operator (e.g. could be symbolic)		镜像名称
+	Volumes         map[string]struct{} // List of volumes (mounts) used for the container									挂载目录
+	WorkingDir      string              // Current directory (PWD) in the command will be launched							进程指定的工作目录
+	Entrypoint      strslice.StrSlice   // Entrypoint to run when starting the container									覆盖镜像中默认的entrypoint
+	NetworkDisabled bool                `json:",omitempty"` // Is network disabled											是否关闭容器网络功能
+	MacAddress      string              `json:",omitempty"` // Mac Address of the container									MAC地址
 	OnBuild         []string            // ONBUILD metadata that were defined on the image Dockerfile
 	Labels          map[string]string   // List of labels set to this container
 	StopSignal      string              `json:",omitempty"` // Signal to stop a container

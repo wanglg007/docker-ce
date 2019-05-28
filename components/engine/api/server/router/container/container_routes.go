@@ -443,7 +443,9 @@ func (s *containerRouter) postContainerUpdate(ctx context.Context, w http.Respon
 
 	return httputils.WriteJSON(w, http.StatusOK, resp)
 }
-
+// 该函数功能为：对client提交的POST表单进行分析整理，获得config配置和hostconfig配置；然后daemon会调用daemon.newContainer函数来创建一个基本的container对象，并
+// 将config和hostconfig中保存的信息填写到container对象中。当然此时的container对象并不是一个具体的物理容器，它其中保存着所有用户指定的参数和Docker生成的一些默
+// 认的配置信息。最后，Docker会将container对象进行JSON编码，然后保存到其对应的状态文件中。
 func (s *containerRouter) postContainersCreate(ctx context.Context, w http.ResponseWriter, r *http.Request, vars map[string]string) error {
 	if err := httputils.ParseForm(r); err != nil {					//1>解析表单
 		return err
@@ -454,7 +456,7 @@ func (s *containerRouter) postContainersCreate(ctx context.Context, w http.Respo
 
 	name := r.Form.Get("name")									//3>从form表单中获取名字，“/containers/create”
 	//4>获取从client传过来的Config、hostConfig和networkingConfig配置信息
-	config, hostConfig, networkingConfig, err := s.decoder.DecodeConfig(r.Body)
+	config, hostConfig, networkingConfig, err := s.decoder.DecodeConfig(r.Body)			//服务器端接收到的配置信息
 	if err != nil {
 		return err
 	}
@@ -466,7 +468,7 @@ func (s *containerRouter) postContainersCreate(ctx context.Context, w http.Respo
 		hostConfig.AutoRemove = false
 	}
 	//5>传入配置信息，调用ContainerCreate进一步创建容器
-	ccr, err := s.backend.ContainerCreate(types.ContainerCreateConfig{
+	ccr, err := s.backend.ContainerCreate(types.ContainerCreateConfig{					//对应的接口ContainerCreate，在daemon文件夹中查找该接口的实现
 		Name:             name,
 		Config:           config,				//Config是基于容器的可移植性信息，与host相互独立，包括容器的基本信息，名字，io流等
 		HostConfig:       hostConfig,			//包含非可移植性的信息

@@ -60,5 +60,10 @@ Docker架构中Engine内部最基本的工作执行单元。DockerDaemon以完�
     overlay2存储驱动：
     components/engine/daemon/graphdriver/overlay2/overlay.go：Init() ->
 
-(5)
+(5)docker start分析:
+    从docker daemon 收到请求的route路由开始梳理：
+    1>components/engine/api/server/router/container/container.go文件下，找到start容器的API路由:
+    router.NewPostRoute(“/exec/{name:.*}/start”, r.postContainerExecStart)
+    2>进入ContainerStart() -> ContainerStart()
+
 

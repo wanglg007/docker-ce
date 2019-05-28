@@ -19,8 +19,8 @@ func (daemon *Daemon) ContainerStart(name string, hostConfig *containertypes.Hos
 	if checkpoint != "" && !daemon.HasExperimental() {
 		return errdefs.InvalidParameter(errors.New("checkpoint is only supported in experimental mode"))
 	}
-
-	container, err := daemon.GetContainer(name)					//可以根据全容器ID、容器名、容器ID前缀获取容器对象
+	//(1)实例化容器对象
+	container, err := daemon.GetContainer(name)					//通过container名称或者完整ID，或者ID前缀获取一个container实例
 	if err != nil {
 		return err
 	}
@@ -28,12 +28,12 @@ func (daemon *Daemon) ContainerStart(name string, hostConfig *containertypes.Hos
 	validateState := func() error {
 		container.Lock()
 		defer container.Unlock()
-
-		if container.Paused {
+		//(2)判断暂停状态
+		if container.Paused {									//如果暂停的容器不能启动，先unpause再启动
 			return errdefs.Conflict(errors.New("cannot start a paused container, try unpause instead"))
 		}
-
-		if container.Running {
+		//(3)判断是否运行
+		if container.Running {									//如果是运行的容器不用启动
 			return containerNotModifiedError{running: true}
 		}
 
@@ -47,7 +47,7 @@ func (daemon *Daemon) ContainerStart(name string, hostConfig *containertypes.Hos
 		return err
 	}
 
-	// Windows does not have the backwards compatibility issue here.
+	// Windows does not have the backwards compatibility issue here.		//(4)向后兼容设置[主要针对非windows系统]
 	if runtime.GOOS != "windows" {
 		// This is kept for backward compatibility - hostconfig should be passed when
 		// creating a container, not during start.
@@ -80,19 +80,20 @@ func (daemon *Daemon) ContainerStart(name string, hostConfig *containertypes.Hos
 		}
 	}
 
-	// check if hostConfig is in line with the current system settings.
+	// check if hostConfig is in line with the current system settings.		(5)确认hostconfig配置[认hostconfig与当前系统是否一致]
 	// It may happen cgroups are umounted or the like.
 	if _, err = daemon.verifyContainerSettings(container.OS, container.HostConfig, nil, false); err != nil {
 		return errdefs.InvalidParameter(err)
 	}
-	// Adapt for old containers in case we have updates in this function and
+	// Adapt for old containers in case we have updates in this function and	调整旧版容器设置
 	// old containers never have chance to call the new function in create stage.
 	if hostConfig != nil {
+		//为老的容器调整的函数，老的容器在创建阶段没有机会调用的函数
 		if err := daemon.adaptContainerSettings(container.HostConfig, false); err != nil {
 			return errdefs.InvalidParameter(err)
 		}
 	}
-	//调用containerStart进一步启动容器
+	//(7)创建结束，返回container对象
 	return daemon.containerStart(container, checkpoint, checkpointDir, true)
 }
 
@@ -102,10 +103,11 @@ func (daemon *Daemon) ContainerStart(name string, hostConfig *containertypes.Hos
 // begin running.
 func (daemon *Daemon) containerStart(container *container.Container, checkpoint string, checkpointDir string, resetRestartManager bool) (err error) {
 	start := time.Now()
-	container.Lock()
+	//(1)容器对象加锁
+	container.Lock()							//container 对象加锁
 	defer container.Unlock()
-
-	if resetRestartManager && container.Running { // skip this check if already in restarting step and resetRestartManager==false
+	//(2)状态校验，如该已经运行，直接返回
+	if resetRestartManager && container.Running { // skip this check if already in restarting step and resetRestartManager==false  容器状态判断
 		return nil
 	}
 

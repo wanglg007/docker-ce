@@ -354,15 +354,15 @@ type UpdateConfig struct {
 // HostConfig the non-portable Config structure of a container.
 // Here, "non-portable" means "dependent of the host we are running on".
 // Portable information *should* appear in Config.
-type HostConfig struct {
+type HostConfig struct {		  // 与主机相关的配置信息
 	// Applicable to all platforms
-	Binds           []string      // List of volume bindings for this container
-	ContainerIDFile string        // File (path) where the containerId is written
-	LogConfig       LogConfig     // Configuration of the logs for this container
-	NetworkMode     NetworkMode   // Network mode to use for the container
-	PortBindings    nat.PortMap   // Port mapping between the exposed port (container) and the host
-	RestartPolicy   RestartPolicy // Restart policy to be used for the container
-	AutoRemove      bool          // Automatically remove container when it exits
+	Binds           []string      // List of volume bindings for this container							//从宿主机上绑定到容器的volume
+	ContainerIDFile string        // File (path) where the containerId is written						//用于写入容器ID的文件名
+	LogConfig       LogConfig     // Configuration of the logs for this container						//配置容器的日志
+	NetworkMode     NetworkMode   // Network mode to use for the container								//容器的网络模式
+	PortBindings    nat.PortMap   // Port mapping between the exposed port (container) and the host		//容器绑定到宿主及的端口
+	RestartPolicy   RestartPolicy // Restart policy to be used for the container						//容器退出是采取的重启策略
+	AutoRemove      bool          // Automatically remove container when it exits						//容器退出时是否自动移除容器
 	VolumeDriver    string        // Name of the volume driver used to mount volumes
 	VolumesFrom     []string      // List of volumes to take from other container
 

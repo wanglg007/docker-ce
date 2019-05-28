@@ -45,7 +45,7 @@ func NewRunCommand(dockerCli command.Cli) *cobra.Command {
 			if len(args) > 1 {
 				copts.Args = args[1:]
 			}
-			return runRun(dockerCli, cmd.Flags(), &opts, copts)
+			return runRun(dockerCli, cmd.Flags(), &opts, copts)		//run 命令对应的客户端方法
 		},
 	}
 
@@ -161,7 +161,7 @@ func runContainer(dockerCli command.Cli, opts *runOptions, copts *containerOptio
 
 	ctx, cancelFun := context.WithCancel(context.Background())
 	//使用post方式发送container create命令的json数据交由docker daemon管理
-	createResponse, err := createContainer(ctx, dockerCli, containerConfig, &opts.createOptions)
+	createResponse, err := createContainer(ctx, dockerCli, containerConfig, &opts.createOptions)					//创建容器
 	if err != nil {
 		reportError(stderr, cmdPath, err.Error(), true)
 		return runStartContainerErr(err)
@@ -200,7 +200,7 @@ func runContainer(dockerCli command.Cli, opts *runOptions, copts *containerOptio
 	statusChan := waitExitOrRemoved(ctx, dockerCli, createResponse.ID, copts.autoRemove)
 
 	//start the container           使用post方式发送container start命令JSON数据交由docker daemon管理
-	if err := client.ContainerStart(ctx, createResponse.ID, types.ContainerStartOptions{}); err != nil {
+	if err := client.ContainerStart(ctx, createResponse.ID, types.ContainerStartOptions{}); err != nil {		//启动容器
 		// If we have hijackedIOStreamer, we should notify
 		// hijackedIOStreamer we are going to exit and wait
 		// to avoid the terminal are not restored.

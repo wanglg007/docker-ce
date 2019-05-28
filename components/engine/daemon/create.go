@@ -39,9 +39,9 @@ func (daemon *Daemon) containerCreate(params types.ContainerCreateConfig, manage
 	if params.Config == nil {
 		return containertypes.ContainerCreateCreatedBody{}, errdefs.InvalidParameter(errors.New("Config cannot be empty in order to create a container"))
 	}
-
+	//获取镜像ID[通过镜像的名字，获取完整的镜像ID，然后使用该镜像ID获得完整的镜像结构体，用于以后创建容器]
 	os := runtime.GOOS
-	if params.Config.Image != "" {
+	if params.Config.Image != "" {									// 通过image name获取image id
 		img, err := daemon.GetImage(params.Config.Image)			// 拉取镜像
 		if err == nil {
 			os = img.OS
@@ -91,10 +91,10 @@ func (daemon *Daemon) create(params types.ContainerCreateConfig, managed bool) (
 		imgID     image.ID
 		err       error
 	)
-
+	//(1)获取镜像ID[通过镜像的名字，获取完整的镜像ID，然后使用该镜像ID获得完整的镜像结构体，用于以后创建容器]
 	os := runtime.GOOS
-	if params.Config.Image != "" {				//查找Image
-		img, err = daemon.GetImage(params.Config.Image)
+	if params.Config.Image != "" {							//查找Image
+		img, err = daemon.GetImage(params.Config.Image)		//通过image name获取image id
 		if err != nil {
 			return nil, err
 		}
@@ -116,15 +116,15 @@ func (daemon *Daemon) create(params types.ContainerCreateConfig, managed bool) (
 			os = "linux" // 'scratch' case.
 		}
 	}
-	//将用户指定的Config参数与镜像json文件中的config合并并验证
+	//(2)将用户指定的Config参数与镜像json文件中的config合并并验证
 	if err := daemon.mergeAndVerifyConfig(params.Config, img); err != nil {
 		return nil, errdefs.InvalidParameter(err)
 	}
-	//如果没有指定container、log、driver，将daemon log config与container log config合并
+	//(3)将用户指定的log config参数与镜像中json文件中的config参数合并并验证
 	if err := daemon.mergeAndVerifyLogConfig(&params.HostConfig.LogConfig); err != nil {
 		return nil, errdefs.InvalidParameter(err)
 	}
-	//创建容器。此处返回的是内存中对容器的一个抽象`Container`
+	//(4)创建新的container对象[初始化一个容器的结构体newContainer，包含基本的信息，比如容器名称、配置文件结构体、对应的镜像ID等]
 	if container, err = daemon.newContainer(params.Name, os, params.Config, params.HostConfig, imgID, managed); err != nil {
 		return nil, err
 	}
@@ -135,7 +135,7 @@ func (daemon *Daemon) create(params types.ContainerCreateConfig, managed bool) (
 			}
 		}
 	}()
-	//设置安全选项
+	//(5)设置安全选项
 	if err := daemon.setSecurityOptions(container, params.HostConfig); err != nil {
 		return nil, err
 	}
@@ -160,18 +160,19 @@ func (daemon *Daemon) create(params types.ContainerCreateConfig, managed bool) (
 	}
 
 	// Set RWLayer for container after mount labels have been set		要创建一个RWLayer，这样容器里面才可以读写。前面的layer都包含在image里。
-	if err := daemon.setRWLayer(container); err != nil {				//挂载了labels后，为容器设置读写层
+	if err := daemon.setRWLayer(container); err != nil {				//(6)创建容器的读写层
 		return nil, errdefs.System(err)
 	}
-	//以 root uid gid的属性创建目录，在/var/lib/docker/containers目录下创建容器文件，并在容器文件下创建checkpoints目录
+	//(7)创建文件夹,用于保存容器的配置信息[在/var/lib/docker/containers/id下,获取rootUID,rootGID，并创建容器文件夹保存容器的配置信息]
 	rootIDs := daemon.idMappings.RootPair()
+	//创建文件夹,用于保存容器的配置信息，在/var/lib/docker/containers/id下,并赋予容器进程的读写权限
 	if err := idtools.MkdirAndChown(container.Root, 0700, rootIDs); err != nil {
 		return nil, err
 	}
 	if err := idtools.MkdirAndChown(container.CheckpointDir(), 0700, rootIDs); err != nil {
 		return nil, err
 	}
-
+	//把配置文件保存到磁盘
 	if err := daemon.setHostConfig(container, params.HostConfig); err != nil {
 		return nil, err
 	}
@@ -187,8 +188,9 @@ func (daemon *Daemon) create(params types.ContainerCreateConfig, managed bool) (
 	// Make sure NetworkMode has an acceptable value. We do this to ensure
 	// backwards API compatibility.
 	runconfig.SetDefaultNetModeIfBlank(container.HostConfig)				//如果没有设置网络，将网络模式设置为 default
-
+	//(8)更新容器网络配置，并保存到硬盘
 	daemon.updateContainerNetworkSettings(container, endpointsConfigs)		//更新网络设置
+	//(9)最后注册该容器到docker daemon
 	if err := daemon.Register(container); err != nil {						//在Daemon中注册新建的container对象
 		return nil, err
 	}
@@ -300,7 +302,7 @@ func (daemon *Daemon) VolumeCreate(name, driverName string, opts, labels map[str
 	apiV.Mountpoint = v.Path()
 	return apiV, nil
 }
-
+//该函数主要工作:初始化容器的一些配置，比如环境变量，主机名称等
 func (daemon *Daemon) mergeAndVerifyConfig(config *containertypes.Config, img *image.Image) error {
 	if img != nil && img.Config != nil {
 		if err := merge(config, img.Config); err != nil {
