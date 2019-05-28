@@ -21,7 +21,7 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
-
+// 解析请求参数。如果image存在则调用PullImage，空则调用ImportImage
 // Creates an image from Pull or from Import
 func (s *imageRouter) postImagesCreate(ctx context.Context, w http.ResponseWriter, r *http.Request, vars map[string]string) error {
 

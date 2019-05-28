@@ -39,3 +39,19 @@ Docker架构中Engine内部最基本的工作执行单元。DockerDaemon以完�
     <2.3>Docker daemon--container start部分:
     daemon端对container start的处理，即r.postContainersStart()函数。
 
+(3)docker pull image源码分析:
+    docker发送image的名称+tag（或者digest）给registry服务器，服务器根据收到的image的名称+tag（或者digest），找到相应image的manifest，然后
+将manifest返回给docker。docker得到manifest后，读取里面image配置文件的digest(sha256)，这个sha256码就是image的ID。根据ID在本地找有没有存在
+同样ID的image，有的话就不用继续下载。如果没有，那么会给registry服务器发请求（里面包含配置文件的sha256和media type），拿到image的配置文件。根
+据配置文件中的diff_ids（每个diffid对应一个layer tar包的sha256，tar包相当于layer的原始格式），在本地找对应的layer是否存在。如果layer不存在，
+则根据manifest里面layer的sha256和media type去服务器拿相应的layer（相当去拿压缩格式的包）。拿到后进行解压，并检查解压后tar包的sha256能否和配置
+文件（Image Config）中的diff_id对的上，对不上说明有问题，下载失败。根据docker所用的后台文件系统类型，解压tar包并放到指定的目录,等所有的layer都下
+载完成后，整个image下载完成。
+    客户端ImagePull代码分析：
+    components/cli/cli/command/image/cmd.go:NewImageCommand() -> NewPullCommand() -> runPull() -> imagePullPrivileged() -> ImagePull()
+    服务端postImagesCreate:
+    components/engine/api/server/router/image/image_routes.go:postImagesCreate
+    服务端PullImage:
+    components/engine/daemon/image_pull.go:PullImage() -> pullImageWithReference() -> Pull()
+
+
