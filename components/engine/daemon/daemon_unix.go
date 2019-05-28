@@ -894,7 +894,7 @@ func initBridgeDriver(controller libnetwork.NetworkController, config *config.Co
 
 	nw := nwList[0]
 	if len(nwList) > 1 && config.BridgeConfig.FixedCIDR != "" {
-		_, fCIDR, err := net.ParseCIDR(config.BridgeConfig.FixedCIDR)
+		_, fCIDR, err := net.ParseCIDR(config.BridgeConfig.FixedCIDR)			//将字符串s解析成一个ip地址和子网掩码的结构体中，*net.IPNet
 		if err != nil {
 			return errors.Wrap(err, "parse CIDR failed")
 		}
@@ -908,8 +908,8 @@ func initBridgeDriver(controller libnetwork.NetworkController, config *config.Co
 	}
 
 	ipamV4Conf.PreferredPool = lntypes.GetIPNetCanonical(nw).String()
-	hip, _ := lntypes.GetHostPartIP(nw.IP, nw.Mask)
-	if hip.IsGlobalUnicast() {
+	hip, _ := lntypes.GetHostPartIP(nw.IP, nw.Mask)								//返回主机部分网址
+	if hip.IsGlobalUnicast() {													//如果ip是全局单播地址，则返回真。
 		ipamV4Conf.Gateway = nw.IP.String()
 	}
 
@@ -937,7 +937,7 @@ func initBridgeDriver(controller libnetwork.NetworkController, config *config.Co
 		ipamV4Conf.AuxAddresses["DefaultGatewayIPv4"] = config.BridgeConfig.DefaultGatewayIPv4.String()
 	}
 
-	var deferIPv6Alloc bool
+	var deferIPv6Alloc bool														//ipv6地址的设置
 	if config.BridgeConfig.FixedCIDRv6 != "" {
 		_, fCIDRv6, err := net.ParseCIDR(config.BridgeConfig.FixedCIDRv6)
 		if err != nil {

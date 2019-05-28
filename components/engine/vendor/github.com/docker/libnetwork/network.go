@@ -919,7 +919,7 @@ func (n *network) driverIsMultihost() bool {
 }
 
 func (n *network) driver(load bool) (driverapi.Driver, error) {
-	d, cap, err := n.resolveDriver(n.networkType, load)
+	d, cap, err := n.resolveDriver(n.networkType, load)			//根据网络类型从DrvRegistry中获取网络驱动，如果没有，则看load是否为true，是true的话，就载入该网络类型的驱动
 	if err != nil {
 		return nil, err
 	}
@@ -1068,12 +1068,12 @@ func (n *network) deleteNetwork() error {
 }
 
 func (n *network) addEndpoint(ep *endpoint) error {
-	d, err := n.driver(true)
+	d, err := n.driver(true)										//获得网络驱动
 	if err != nil {
 		return fmt.Errorf("failed to add endpoint: %v", err)
 	}
 
-	err = d.CreateEndpoint(n.id, ep.id, ep.Interface(), ep.generic)
+	err = d.CreateEndpoint(n.id, ep.id, ep.Interface(), ep.generic)		//调用网络驱动创建endpoint，有bridge、host等
 	if err != nil {
 		return types.InternalErrorf("failed to create endpoint %s on network %s: %v",
 			ep.Name(), n.Name(), err)
@@ -1107,22 +1107,22 @@ func (n *network) createEndpoint(name string, options ...EndpointOption) (Endpoi
 	var err error
 
 	ep := &endpoint{name: name, generic: make(map[string]interface{}), iface: &endpointInterface{}}
-	ep.id = stringid.GenerateRandomID()
+	ep.id = stringid.GenerateRandomID()						//随机生成一个endpoint ID
 
 	// Initialize ep.network with a possibly stale copy of n. We need this to get network from
 	// store. But once we get it from store we will have the most uptodate copy possibly.
 	ep.network = n
 	ep.locator = n.getController().clusterHostID()
-	ep.network, err = ep.getNetworkFromStore()
+	ep.network, err = ep.getNetworkFromStore()				//根据n，从store中获取最新的network
 	if err != nil {
 		return nil, fmt.Errorf("failed to get network during CreateEndpoint: %v", err)
 	}
 	n = ep.network
-
+	//处理endpoint的option,这里的option都是一些函数(type EndpointOption func(ep *endpoint))，也就是使用option这个函数来处理endpoint
 	ep.processOptions(options...)
-
+	//遍历endpoint.iface.llAddrs,是[]*net.IPNet类型，returns the list of link-local (IPv4/IPv6) addresses assigned to the endpoint.返回的是endpoint的ip地址
 	for _, llIPNet := range ep.Iface().LinkLocalAddresses() {
-		if !llIPNet.IP.IsLinkLocalUnicast() {
+		if !llIPNet.IP.IsLinkLocalUnicast() {				//判断是否时链路本地单播地址
 			return nil, types.BadRequestErrorf("invalid link local IP address: %v", llIPNet.IP)
 		}
 	}

@@ -362,6 +362,7 @@ func (daemon *Daemon) restore() error {
 		}(c)
 	}
 	wg.Wait()
+	//创建一个networkController,可用于之后network和sandbox等的创建
 	daemon.netController, err = daemon.initNetworkController(daemon.configStore, activeSandboxes)
 	if err != nil {
 		return fmt.Errorf("Error initializing network controller: %v", err)

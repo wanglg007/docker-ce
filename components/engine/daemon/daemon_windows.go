@@ -263,13 +263,14 @@ func configureKernelSecuritySupport(config *config.Config, driverName string) er
 func configureMaxThreads(config *config.Config) error {
 	return nil
 }
-
+//该函数工作:(1)调用libnetwork的New函数创建NetworkController;(2)向controller注册none、host、bridge三个默认network;
 func (daemon *Daemon) initNetworkController(config *config.Config, activeSandboxes map[string]interface{}) (libnetwork.NetworkController, error) {
+	//network options,如OptionExecRoot、OptionDefaultDriver、OptionDefaultNetwork等
 	netOptions, err := daemon.networkOptions(config, nil, nil)
 	if err != nil {
 		return nil, err
 	}
-	controller, err := libnetwork.New(netOptions...)
+	controller, err := libnetwork.New(netOptions...)				//根据netOptions创建net controller
 	if err != nil {
 		return nil, fmt.Errorf("error obtaining controller instance: %v", err)
 	}
@@ -303,7 +304,7 @@ func (daemon *Daemon) initNetworkController(config *config.Config, activeSandbox
 		}
 	}
 
-	_, err = controller.NewNetwork("null", "none", "", libnetwork.NetworkOptionPersist(false))
+	_, err = controller.NewNetwork("null", "none", "", libnetwork.NetworkOptionPersist(false))	//如果没有就新建一个
 	if err != nil {
 		return nil, err
 	}

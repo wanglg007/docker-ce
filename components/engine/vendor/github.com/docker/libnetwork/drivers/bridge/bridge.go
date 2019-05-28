@@ -562,8 +562,8 @@ func (d *driver) CreateNetwork(id string, option map[string]interface{}, nInfo d
 	if err != nil {
 		return err
 	}
-	//对ip地址的处理
-	if err = config.processIPAM(id, ipV4Data, ipV6Data); err != nil {
+
+	if err = config.processIPAM(id, ipV4Data, ipV6Data); err != nil {			//对ip地址的处理
 		return err
 	}
 
@@ -882,7 +882,7 @@ func (d *driver) CreateEndpoint(nid, eid string, ifInfo driverapi.InterfaceInfo,
 
 	// Get the network handler and make sure it exists
 	d.Lock()
-	n, ok := d.networks[nid]
+	n, ok := d.networks[nid]				//根据network id获得container的network，类型为bridgeNetwork
 	dconfig := d.config
 	d.Unlock()
 

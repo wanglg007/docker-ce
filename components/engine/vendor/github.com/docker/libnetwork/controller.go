@@ -204,7 +204,7 @@ func New(cfgOptions ...config.Option) (NetworkController, error) {
 	if err := c.initStores(); err != nil {
 		return nil, err
 	}
-
+	//DrvRegistry holds the registry of all network drivers and IPAM drivers that it knows about.
 	drvRegistry, err := drvregistry.New(c.getStore(datastore.LocalScope), c.getStore(datastore.GlobalScope), c.RegisterDriver, nil, c.cfg.PluginGetter)
 	if err != nil {
 		return nil, err
@@ -215,7 +215,7 @@ func New(cfgOptions ...config.Option) (NetworkController, error) {
 
 		// External plugins don't need config passed through daemon. They can
 		// bootstrap themselves
-		if i.ntype != "remote" {			//如果不是remote驱动，则创建driver config
+		if i.ntype != "remote" {							//如果不是remote驱动，则创建driver config
 			dcfg = c.makeDriverConfig(i.ntype)
 		}
 		//将这些驱动的名字、初始化函数、config添加到drvRegistry中
@@ -982,12 +982,12 @@ func (c *controller) addNetwork(n *network) error {
 		return err
 	}
 
-	// Create the network
+	// Create the network  [以bridge driver为例的，所以它的实现位于moby/vendor/github.com/docker/libnetwork/drivers/bridge/bridge.go]
 	if err := d.CreateNetwork(n.id, n.generic, n, n.getIPData(4), n.getIPData(6)); err != nil {
 		return err
 	}
 
-	n.startResolver()
+	n.startResolver()						//在linux中是个空函数
 
 	return nil
 }
@@ -1024,7 +1024,7 @@ func (c *controller) NetworkByName(name string) (Network, error) {
 	}
 	var n Network
 
-	s := func(current Network) bool {
+	s := func(current Network) bool {				//查找network时，确认是所查network用到的函数
 		if current.Name() == name {
 			n = current
 			return true
@@ -1032,7 +1032,7 @@ func (c *controller) NetworkByName(name string) (Network, error) {
 		return false
 	}
 
-	c.WalkNetworks(s)
+	c.WalkNetworks(s)								//遍历controller中的network
 
 	if n == nil {
 		return nil, ErrNoSuchNetwork(name)

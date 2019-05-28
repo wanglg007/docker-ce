@@ -699,7 +699,7 @@ func (daemon *Daemon) updateNetworkConfig(container *container.Container, n libn
 //4.若2.中获取的sandbox为nil，则由netController创建sandbox;5.将endpoint加入sandbox中
 func (daemon *Daemon) connectToNetwork(container *container.Container, idOrName string, endpointConfig *networktypes.EndpointSettings, updateSettings bool) (err error) {
 	start := time.Now()
-	if container.HostConfig.NetworkMode.IsContainer() {			//如果是container模式，返回错误
+	if container.HostConfig.NetworkMode.IsContainer() {										//如果是container模式，返回错误
 		return runconfig.ErrConflictSharedNetwork
 	}
 	if containertypes.NetworkMode(idOrName).IsBridge() &&
@@ -710,8 +710,8 @@ func (daemon *Daemon) connectToNetwork(container *container.Container, idOrName 
 	if endpointConfig == nil {
 		endpointConfig = &networktypes.EndpointSettings{}
 	}
-	//根据network的name或id查找network，并连接
-	n, config, err := daemon.findAndAttachNetwork(container, idOrName, endpointConfig)
+
+	n, config, err := daemon.findAndAttachNetwork(container, idOrName, endpointConfig)		//根据network的name或id查找network，并连接
 	if err != nil {
 		return err
 	}
