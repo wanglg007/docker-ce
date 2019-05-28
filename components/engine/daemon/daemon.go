@@ -734,9 +734,9 @@ func NewDaemon(config *config.Config, registryService registry.Service, containe
 		return pluginexec.New(getPluginExecRoot(config.Root), containerdRemote, m)
 	}
 
-	// Plugin system initialization should happen before restore. Do not change order.
+	// Plugin system initialization should happen before restore. Do not change order.       调用NewManager实例化
 	d.pluginManager, err = plugin.NewManager(plugin.ManagerConfig{
-		Root:               filepath.Join(config.Root, "plugins"),
+		Root:               filepath.Join(config.Root, "plugins"),		//root路径默认为：/var/lib/docker，execRoot路径为：/run/docker/plugins
 		ExecRoot:           getPluginExecRoot(config.Root),
 		Store:              d.PluginStore,
 		CreateExecutor:     createPluginExec,
@@ -754,7 +754,7 @@ func NewDaemon(config *config.Config, registryService registry.Service, containe
 	}
 
 	for operatingSystem, gd := range d.graphDrivers {
-		d.layerStores[operatingSystem], err = layer.NewStoreFromOptions(layer.StoreOptions{
+		d.layerStores[operatingSystem], err = layer.NewStoreFromOptions(layer.StoreOptions{		//实例化layerStore
 			Root: config.Root,
 			MetadataStorePathTemplate: filepath.Join(config.Root, "image", "%s", "layerdb"),
 			GraphDriver:               gd,

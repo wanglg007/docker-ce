@@ -17,3 +17,10 @@ Docker Client的main函数位于docker-ce/components/cli/cmd/docker/docker.go
     <3.5>分析完毕;
     以上便是pull请求的全部过程，其他请求在执行流程上也大同小异。总之，请求执行过程中，大多都是将命令行中关于请求的参数进行初步处理，并添加相应的
     辅助信息，最终通过指定的协议向Docker Server发送相应的API请求。这些API请求都是Docker Client和Docker Server事先约定好的。
+(4)Docker Client执行流程:
+    一.initialization阶段:     Client入口:components/cli/cmd/docker/docker.go
+    二.PreRun阶段:             components/cli/cmd/docker/docker.go:newDockerCommand() -> Initialize()
+    三.Run阶段:
+    真正的具体的命令执行也很简单，Docker的Client不做任何实质性的功能，所有的请求都是发送给deamon来处理，所以做的事情很简单，具体如下:
+    参数处理，构建请求; 向Docker daemon发送请求; 处理响应; 打印结果; 返回状态。下文将以docker image list = docker images 命令为例：
+    components/cli/cli/command/image/list.go:newListCommand()

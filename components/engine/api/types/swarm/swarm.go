@@ -27,7 +27,7 @@ type JoinTokens struct {
 }
 
 // Spec represents the spec of a swarm.
-type Spec struct {
+type Spec struct {				//容器运行的基本配置
 	Annotations
 
 	Orchestration    OrchestrationConfig `json:",omitempty"`

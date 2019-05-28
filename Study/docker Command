@@ -54,4 +54,11 @@ Docker架构中Engine内部最基本的工作执行单元。DockerDaemon以完�
     服务端PullImage:
     components/engine/daemon/image_pull.go:PullImage() -> pullImageWithReference() -> Pull()
 
+(4)Docker镜像概念:
+    NewDaemon函数：
+    components/engine/daemon/daemon.go:NewDaemon() -> NewManager() ->
+    overlay2存储驱动：
+    components/engine/daemon/graphdriver/overlay2/overlay.go：Init() ->
+
+(5)
 

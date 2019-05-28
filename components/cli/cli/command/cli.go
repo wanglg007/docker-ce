@@ -55,15 +55,15 @@ type Cli interface {
 	ContentTrustEnabled() bool
 }
 
-// DockerCli is an instance the docker command line client.
+// DockerCli is an instance the docker command line client.         此结构体是核心的结构体，每个子命令的执行都会用到它
 // Instances of the client can be returned from NewDockerCli.
 type DockerCli struct {
-	configFile   *configfile.ConfigFile
-	in           *InStream
-	out          *OutStream
-	err          io.Writer
-	client       client.APIClient
-	serverInfo   ServerInfo
+	configFile   *configfile.ConfigFile						// ~/.docker/config.json文件的配置信息
+	in           *InStream									// Stdin
+	out          *OutStream									// Stdout
+	err          io.Writer									// Stderr
+	client       client.APIClient							// 用于与deamon通讯
+	serverInfo   ServerInfo									// ServerInfo信息
 	clientInfo   ClientInfo
 	contentTrust bool
 }

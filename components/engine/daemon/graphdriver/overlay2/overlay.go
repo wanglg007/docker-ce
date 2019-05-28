@@ -127,7 +127,7 @@ func Init(home string, options []string, uidMaps, gidMaps []idtools.IDMap) (grap
 		return nil, err
 	}
 
-	if err := supportsOverlay(); err != nil {
+	if err := supportsOverlay(); err != nil {			// 验证是否支持overlay
 		return nil, graphdriver.ErrNotSupported
 	}
 

@@ -22,9 +22,9 @@ import (
 )
 // DockerCli实现了Command.Cli接口
 func newDockerCommand(dockerCli *command.DockerCli) *cobra.Command {
-	opts := cliflags.NewClientOptions()		//配置client的options(选项结构对象，之后通过传入的选项参数进行填充)
+	opts := cliflags.NewClientOptions()		//配置client的options(绑定在根命令上的参数，即docker命令)
 	var flags *pflag.FlagSet				//选项集合
-	//定义命令
+	//定义命令[docker根命令]
 	cmd := &cobra.Command{					//创建并初始化cobra.Command类型的对象实例，即根命令docker
 		Use:              "docker [OPTIONS] COMMAND [ARG...]",
 		Short:            "A self-sufficient runtime for containers",
@@ -41,15 +41,15 @@ func newDockerCommand(dockerCli *command.DockerCli) *cobra.Command {
 			//docker根命令的具体执行为ShowHelp，即显示help信息
 			return command.ShowHelp(dockerCli.Err())(cmd, args)
 		},
-		//在回调函数执行之前执行的函数
+		//PreRun阶段的入口
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			// flags must be the top-level command flags, not cmd.Flags()
 			opts.Common.SetDefaultOptions(flags)
 			dockerPreRun(opts)
-			if err := dockerCli.Initialize(opts); err != nil {
+			if err := dockerCli.Initialize(opts); err != nil {			//初始化DockerCli上下文，重要函数dockerCli.Initialize
 				return err
 			}
-			return isSupported(cmd, dockerCli)
+			return isSupported(cmd, dockerCli)							//校验命令
 		},
 	}
 	cli.SetupRootCommand(cmd)				//为根命令设置usage, help等命令及错误处理(设置默认的处理方式)
@@ -65,7 +65,7 @@ func newDockerCommand(dockerCli *command.DockerCli) *cobra.Command {
 	setHelpFunc(dockerCli, cmd, flags, opts)
 
 	cmd.SetOutput(dockerCli.Out())
-	commands.AddCommands(cmd, dockerCli)	//把所有子命令（如docker run、docker build等）增加到根目录下
+	commands.AddCommands(cmd, dockerCli)	//组装所有子命令入口
 
 	setValidateArgs(dockerCli, cmd, flags, opts)
 
@@ -154,15 +154,15 @@ func noArgs(cmd *cobra.Command, args []string) error {
 	return fmt.Errorf(
 		"docker: '%s' is not a docker command.\nSee 'docker --help'", args[0])
 }
-//代码的主要内容是:生成一个带有输入输出的客户端对象->根据dockerCli客户端对象，解析命令行参数，生成带有命令行参数及客户端配置信息的cmd命令行对象->
-//根据输入参数args完成命令执行。
+//代码的主要内容是:(1)初始化日志配置;(2)初始化DockerCli实例，填充Stdin，Stdout，Stderr;(3)初始化Command根命令并组装
 func main() {
 	// Set terminal emulation based on platform as required.
+	// 获取Stdin，Stdout，Stderr
 	stdin, stdout, stderr := term.StdStreams()
-	logrus.SetOutput(stderr)
-
-	dockerCli := command.NewDockerCli(stdin, stdout, stderr, contentTrustEnabled())		// 创建Cli，返回一个DockerCli实例(生成一个带有输入输出的客户端对象)
-	//根据dockerCli客户端对象，解析命令行参数，生成带有命令行参数及客户端配置信息的cmd命令行对象
+	logrus.SetOutput(stderr)															//(1)初始化日志配置
+	//(2)初始化DockerCli实例，填充Stdin，Stdout，Stderr[//生成一个带有输入输出的客户端对象]
+	dockerCli := command.NewDockerCli(stdin, stdout, stderr, contentTrustEnabled())
+	//(3)初始化Command根命令并组装[根据dockerCli客户端对象，解析命令行参数，生成带有命令行参数及客户端配置信息的cmd命令行对象]
 	cmd := newDockerCommand(dockerCli)													// 创建cmd，配置一定的参数并添加所有子命令
 
 	if err := cmd.Execute(); err != nil {												// 执行cmd，并进行错误信息处理

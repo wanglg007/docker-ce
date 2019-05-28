@@ -32,7 +32,7 @@ import (
 // you to define the usage and description as part of your command
 // definition to ensure usability.
 type Command struct {
-	// Use is the one-line usage message.
+	// Use is the one-line usage message.													代表的命令
 	Use string
 
 	// Aliases is an array of aliases that can be used instead of the first word in Use.
@@ -132,9 +132,9 @@ type Command struct {
 	// TraverseChildren parses flags on all parents before executing child command.
 	TraverseChildren bool
 
-	// commands is the list of commands supported by this program.
+	// commands is the list of commands supported by this program.		支持的子命令集合
 	commands []*Command
-	// parent is a parent command for this command.
+	// parent is a parent command for this command.						父命令
 	parent *Command
 	// Max lengths of commands' string lengths for use in padding.
 	commandsMaxUseLen         int
@@ -147,7 +147,7 @@ type Command struct {
 	args []string
 	// flagErrorBuf contains all error messages from pflag.
 	flagErrorBuf *bytes.Buffer
-	// flags is full set of flags.
+	// flags is full set of flags.										参数的集合
 	flags *flag.FlagSet
 	// pflags contains persistent flags.
 	pflags *flag.FlagSet
