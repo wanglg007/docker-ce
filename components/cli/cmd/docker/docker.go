@@ -34,8 +34,8 @@ func newDockerCommand(dockerCli *command.DockerCli) *cobra.Command {
 		Args:             noArgs,
 		//命令执行时的回调函数
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if opts.Version {
-				showVersion()
+			if opts.Version {				//若Docker发现参数Version为真，则说明用户希望查看Docker版本信息
+				showVersion()				//显示版本信息
 				return nil
 			}
 			//docker根命令的具体执行为ShowHelp，即显示help信息

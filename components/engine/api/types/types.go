@@ -373,12 +373,12 @@ type SummaryNetworkSettings struct {
 
 // NetworkSettingsBase holds basic information about networks
 type NetworkSettingsBase struct {
-	Bridge                 string      // Bridge is the Bridge name the network uses(e.g. `docker0`)
+	Bridge                 string      // Bridge is the Bridge name the network uses(e.g. `docker0`)		容器网络接口使用的网桥地址
 	SandboxID              string      // SandboxID uniquely represents a container's network stack
 	HairpinMode            bool        // HairpinMode specifies if hairpin NAT should be enabled on the virtual interface
 	LinkLocalIPv6Address   string      // LinkLocalIPv6Address is an IPv6 unicast address using the link-local prefix
 	LinkLocalIPv6PrefixLen int         // LinkLocalIPv6PrefixLen is the prefix length of an IPv6 unicast address
-	Ports                  nat.PortMap // Ports is a collection of PortBinding indexed by Port
+	Ports                  nat.PortMap // Ports is a collection of PortBinding indexed by Port				容器内部暴露的端口号
 	SandboxKey             string      // SandboxKey identifies the sandbox
 	SecondaryIPAddresses   []network.Address
 	SecondaryIPv6Addresses []network.Address
@@ -389,11 +389,11 @@ type NetworkSettingsBase struct {
 // It will be removed in Docker 1.11.
 type DefaultNetworkSettings struct {
 	EndpointID          string // EndpointID uniquely represents a service endpoint in a Sandbox
-	Gateway             string // Gateway holds the gateway address for the network
+	Gateway             string // Gateway holds the gateway address for the network				容器的默认网关地址
 	GlobalIPv6Address   string // GlobalIPv6Address holds network's global IPv6 address
 	GlobalIPv6PrefixLen int    // GlobalIPv6PrefixLen represents mask length of network's global IPv6 address
-	IPAddress           string // IPAddress holds the IPv4 address for the network
-	IPPrefixLen         int    // IPPrefixLen represents mask length of network's IPv4 address
+	IPAddress           string // IPAddress holds the IPv4 address for the network				容器网络接口的IP网络地址
+	IPPrefixLen         int    // IPPrefixLen represents mask length of network's IPv4 address	网络标志位长度
 	IPv6Gateway         string // IPv6Gateway holds gateway address specific for IPv6
 	MacAddress          string // MacAddress holds the MAC address for the network
 }

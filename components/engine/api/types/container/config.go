@@ -34,7 +34,7 @@ type HealthConfig struct {
 	Retries int `json:",omitempty"`
 }
 
-// Config contains the configuration data about a container.
+// Config contains the configuration data about a container.			描述DOCKER容器本身的属性信息
 // It should hold only portable information about the container.
 // Here, "portable" means "independent from the host we are running on".
 // Non-portable information *should* appear in HostConfig.

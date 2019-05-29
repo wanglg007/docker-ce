@@ -87,22 +87,22 @@ type CommonTLSOptions struct {
 type CommonConfig struct {
 	AuthzMiddleware       *authorization.Middleware `json:"-"`
 	AuthorizationPlugins  []string                  `json:"authorization-plugins,omitempty"` // AuthorizationPlugins holds list of authorization plugins
-	AutoRestart           bool                      `json:"-"`
+	AutoRestart           bool                      `json:"-"`									//是否一直支持创建容器的重启
 	Context               map[string][]string       `json:"-"`
 	DisableBridge         bool                      `json:"-"`
-	DNS                   []string                  `json:"dns,omitempty"`
+	DNS                   []string                  `json:"dns,omitempty"`						//Docker Daemon为容器准备的DNS Server地址
 	DNSOptions            []string                  `json:"dns-opts,omitempty"`
-	DNSSearch             []string                  `json:"dns-search,omitempty"`
+	DNSSearch             []string                  `json:"dns-search,omitempty"`				//Docker使用指定的DNS查找地址
 	ExecOptions           []string                  `json:"exec-opts,omitempty"`
-	GraphDriver           string                    `json:"storage-driver,omitempty"`
-	GraphOptions          []string                  `json:"storage-opts,omitempty"`
+	GraphDriver           string                    `json:"storage-driver,omitempty"`			//Docker Daemon运行时使用的特定存储驱动
+	GraphOptions          []string                  `json:"storage-opts,omitempty"`				//可配置的存储驱动选项
 	Labels                []string                  `json:"labels,omitempty"`
-	Mtu                   int                       `json:"mtu,omitempty"`
+	Mtu                   int                       `json:"mtu,omitempty"`						//设置容器网络接口的MTU
 	NetworkDiagnosticPort int                       `json:"network-diagnostic-port,omitempty"`
-	Pidfile               string                    `json:"pidfile,omitempty"`
+	Pidfile               string                    `json:"pidfile,omitempty"`					//Docker Deamon所属进程的PID文件
 	RawLogs               bool                      `json:"raw-logs,omitempty"`
 	RootDeprecated        string                    `json:"graph,omitempty"`
-	Root                  string                    `json:"data-root,omitempty"`
+	Root                  string                    `json:"data-root,omitempty"`				//Docker运行时所使用的root路径
 	ExecRoot              string                    `json:"exec-root,omitempty"`
 	SocketGroup           string                    `json:"group,omitempty"`
 	CorsHeaders           string                    `json:"api-cors-header,omitempty"`

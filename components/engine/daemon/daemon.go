@@ -71,21 +71,21 @@ var (
 // Daemon holds information about the Docker daemon.
 type Daemon struct {
 	ID                        string
-	repository                string
-	containers                container.Store
+	repository                string					//存储所有DOCKER容器信息的路径
+	containers                container.Store			//用于存储DOCKER容器信息的对象
 	containersReplica         container.ViewDB
 	execCommands              *exec.Store
 	downloadManager           *xfer.LayerDownloadManager
 	uploadManager             *xfer.LayerUploadManager
 	trustKey                  libtrust.PrivateKey
-	idIndex                   *truncindex.TruncIndex
+	idIndex                   *truncindex.TruncIndex	//用于通过简短有效的字符串前缀定位唯一的镜像
 	configStore               *config.Config
 	statsCollector            *stats.Collector
 	defaultLogConfig          containertypes.LogConfig
 	RegistryService           registry.Service
 	EventsService             *events.Events
 	netController             libnetwork.NetworkController
-	volumes                   *store.VolumeStore
+	volumes                   *store.VolumeStore		//管理主机上的volumes内容的graphdriver
 	discoveryWatcher          discovery.Reloader
 	root                      string
 	seccompEnabled            bool
